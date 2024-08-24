@@ -13,10 +13,12 @@ class PostController extends Controller
     //一覧ページ
     public function index()
     {
+
         // クエリビルダ。Auth::user()で現在ログイン中のユーザーを取得。postsテーブルのログイン中ユーザーの投稿.
-        // orderBy句で並び替え。descまたはasc.
+        // orderBy句で並び替え
         // userモデルとpostモデルのリレーションシップを設定済みの為Auth::user()に対してpostメソッドが使える
-        $posts = Auth::user()->posts()->orderBy('created_at', 'desc')->get();
+
+        $posts = Auth::user()->posts()->orderBy('updated_at', 'asc')->get();
 
         return view('posts.index', compact('posts'));
     }
@@ -36,6 +38,12 @@ class PostController extends Controller
     // 作成機能
     public function store(PostRequest $request)
     {
+        // バリデーションを設定する
+        $request->validate([
+            'title' => 'max:40',
+            'content' => 'max:200'
+        ]);
+
         $post = new Post();
         $post->title = $request->input('title');
         $post->content = $request->input('content');
@@ -58,6 +66,13 @@ class PostController extends Controller
     // 更新機能
     public function update(PostRequest $request, Post $post)
     {
+
+        // バリデーションを設定する
+        $request->validate([
+            'title' => 'max:40',
+            'content' => 'max:200'
+        ]);
+
         if ($post->user_id !== Auth::id()) {
             return redirect()->route('posts.index')->with('error_message', '不正なアクセスです。');
         }
